@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Oral Cancer Detector</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+    <style>
+        /* Styles for the page, including buttons and video element */
+    </style>
+
+</head>
+<body>
+    <button id="openCamera">Open Camera</button>
+    <video id="video" autoplay></video>
+    <button id="takePhoto" style="display: none;">Take Photo</button>
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <script>
+        const firebaseConfig = {
+            // ...Your Firebase config
+        };
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+
+        const openCameraButton = document.getElementById('openCamera');
+        const takePhotoButton = document.getElementById('takePhoto');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        let stream;
+
+
+        openCameraButton.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                takePhotoButton.style.display = 'block';
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+            }
+        });
+
+        takePhotoButton.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageDataUrl = canvas.toDataURL('image/jpeg');
+
+            const storageRef = storage.ref().child(`images/${Date.now()}.jpg`);
+            storageRef.putString(imageDataUrl, 'data_url')
+                .then((snapshot) => {
+                    console.log('Image uploaded to Firebase Storage:', snapshot.ref.fullPath);
+                })
+                .catch((error) => {
+                    console.error('Error uploading image:', error);
+                });
+        });
+
+    </script>
+
+
+</body>
+</html>
