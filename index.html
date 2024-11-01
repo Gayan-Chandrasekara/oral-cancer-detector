@@ -89,8 +89,10 @@
                 takePhoto();
             } else {
                 try {
-                    // Request access to the camera
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    // Request access to the back camera
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: "environment" } // Use back camera
+                    });
                     video.srcObject = stream;
                     video.style.display = 'block';  // Show the video element
                 } catch (error) {
