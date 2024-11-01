@@ -8,13 +8,12 @@
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Arial', sans-serif;
+            font-family: sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #e0f7fa, #ffffff);
-            color: #333;
+            background-color: #f0f0f0;
         }
 
         .container {
@@ -36,7 +35,7 @@
         button {
             padding: 15px 30px;
             font-size: 18px;
-            background-color: #00796b;
+            background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
@@ -45,30 +44,19 @@
         }
 
         button:hover {
-            background-color: #004d40;
+            background-color: #388e3c;
         }
 
         video {
             width: 100%;
             height: auto;
             border: 1px solid #ddd;
-            border-radius: 5px;
             display: none; /* Hide initially until stream is set */
             margin-top: 20px;
         }
 
         canvas {
             display: none; /* Hide canvas as it's used for processing */
-        }
-
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 20px;
-            }
-            button {
-                font-size: 16px;
-                padding: 10px 20px;
-            }
         }
     </style>
 
@@ -84,6 +72,7 @@
           projectId: "oral-cancer-detector-7dc29",
           storageBucket: "oral-cancer-detector-7dc29.appspot.com",
           messagingSenderId: "7733802483",
+          appId: "1:7733802483:web:9008d9ad8fad09a59d4e86"
         };
 
         // Initialize Firebase
