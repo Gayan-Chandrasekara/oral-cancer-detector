@@ -93,7 +93,6 @@
                     stream = await navigator.mediaDevices.getUserMedia({ video: true });
                     video.srcObject = stream;
                     video.style.display = 'block';  // Show the video element
-                    flipVideo();
                 } catch (error) {
                     console.error('Error accessing camera:', error);
                     alert('Could not access the camera. Please check permissions.');
@@ -101,32 +100,11 @@
             }
         });
 
-        function flipVideo() {
-            const ctx = canvas.getContext('2d');
-            canvas.width = 400; // Set to the same width as video
-            canvas.height = 300; // Set to the same height as video
-
-            // Draw flipped video feed at regular intervals
-            setInterval(() => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.save();
-                ctx.scale(-1, 1); // Flip horizontally
-                ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
-                ctx.restore();
-            }, 100); // Update every 100ms
-        }
-
         function takePhoto() {
-            // Set canvas dimensions
+            // Draw video frame onto canvas
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-
-            // Draw the flipped video frame onto the canvas
-            const ctx = canvas.getContext('2d');
-            ctx.translate(canvas.width, 0); // Move origin to the right side
-            ctx.scale(-1, 1); // Flip horizontally
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageDataUrl = canvas.toDataURL('image/jpeg');
 
             // Upload to Firebase Storage
