@@ -44,7 +44,6 @@
             border-radius: 5px;
             margin-top: 20px;
             display: none; /* Hide initially until stream is set */
-            transform: scaleX(-1); /* Flip the video horizontally for display */
         }
 
         canvas {
@@ -102,14 +101,18 @@
         });
 
         function takePhoto() {
-            // Draw video frame onto canvas
+            // Set canvas dimensions
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
 
-            // Get canvas context and apply transformation
+            // Get canvas context
             const ctx = canvas.getContext('2d');
-            ctx.scale(-1, 1); // Flip horizontally
-            ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height); // Draw flipped image
+
+            // Flip the canvas horizontally
+            ctx.save(); // Save the current state
+            ctx.scale(-1, 1); // Scale the context horizontally
+            ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height); // Draw the flipped image
+            ctx.restore(); // Restore to the original state
 
             const imageDataUrl = canvas.toDataURL('image/jpeg');
 
