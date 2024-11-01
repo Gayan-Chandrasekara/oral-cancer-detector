@@ -31,6 +31,7 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            margin: 10px; /* Add some space between buttons */
         }
 
         button:hover {
@@ -71,37 +72,48 @@
 </head>
 <body>
     <h1>Oral Cancer Detector</h1>
-    <button id="captureButton">Open Camera & Take Photo</button>
+    <button id="captureButton">Take Photo</button>
+    <button id="uploadButton" style="display: none;">Upload Photo</button>
     <input type="file" id="fileInput" accept="image/*" capture="environment">
     <img id="capturedImage" style="display: none;">
 
     <script>
         const storage = firebase.storage();
         const captureButton = document.getElementById('captureButton');
+        const uploadButton = document.getElementById('uploadButton');
         const fileInput = document.getElementById('fileInput');
         const capturedImage = document.getElementById('capturedImage');
+        let capturedFile = null; // To store the captured file
 
         captureButton.addEventListener('click', () => {
             fileInput.click(); // Trigger file input click to open camera
         });
 
         fileInput.addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (file) {
+            capturedFile = event.target.files[0]; // Store the captured file
+            if (capturedFile) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     capturedImage.src = e.target.result; // Display the captured image
                     capturedImage.style.display = 'block'; // Show the image
+                    uploadButton.style.display = 'block'; // Show the upload button
                 };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(capturedFile);
+            }
+        });
 
+        uploadButton.addEventListener('click', async () => {
+            if (capturedFile) {
                 // Upload to Firebase Storage
                 const storageRef = storage.ref().child(`images/${Date.now()}.jpg`);
-                await storageRef.put(file).then((snapshot) => {
+                await storageRef.put(capturedFile).then((snapshot) => {
                     console.log('Image uploaded to Firebase Storage:', snapshot.ref.fullPath);
+                    alert('Photo uploaded successfully!');
                 }).catch((error) => {
                     console.error('Error uploading image:', error);
                 });
+            } else {
+                alert('No photo captured to upload.');
             }
         });
     </script>
