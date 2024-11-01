@@ -87,7 +87,7 @@
                         video: { facingMode: "environment" } // Use back camera
                     });
 
-                    // Draw the video frames onto the canvas
+                    // Create a video element to get the video stream
                     const video = document.createElement('video');
                     video.srcObject = stream;
                     video.play();
@@ -95,13 +95,36 @@
                     // Set the canvas display
                     canvas.style.display = 'block';
 
-                    // Continuously draw the video onto the canvas
-                    const drawVideoToCanvas = () => {
-                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                        requestAnimationFrame(drawVideoToCanvas);
-                    };
+                    // Draw video to canvas maintaining aspect ratio
+                    video.addEventListener('loadedmetadata', () => {
+                        const aspectRatio = video.videoWidth / video.videoHeight;
+                        let canvasWidth = canvas.width;
+                        let canvasHeight = canvas.height;
 
-                    video.addEventListener('loadedmetadata', drawVideoToCanvas);
+                        if (canvasWidth / canvasHeight > aspectRatio) {
+                            // Canvas is wider than the video
+                            canvasWidth = canvasHeight * aspectRatio;
+                        } else {
+                            // Canvas is taller than the video
+                            canvasHeight = canvasWidth / aspectRatio;
+                        }
+
+                        // Update the canvas dimensions
+                        canvas.width = canvasWidth;
+                        canvas.height = canvasHeight;
+
+                        const drawVideoToCanvas = () => {
+                            // Clear the canvas
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            // Calculate position to center the video
+                            const x = (canvas.width - canvasWidth) / 2;
+                            const y = (canvas.height - canvasHeight) / 2;
+                            ctx.drawImage(video, x, y, canvasWidth, canvasHeight);
+                            requestAnimationFrame(drawVideoToCanvas);
+                        };
+
+                        drawVideoToCanvas();
+                    });
 
                 } catch (error) {
                     console.error('Error accessing camera:', error);
@@ -133,3 +156,4 @@
     </script>
 </body>
 </html>
+
