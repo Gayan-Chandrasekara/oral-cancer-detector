@@ -8,28 +8,18 @@
         body {
             margin: 0;
             padding: 0;
-            font-family: sans-serif;
+            font-family: 'Arial', sans-serif;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
-            background-color: #f0f0f0;
-        }
-
-        .container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            width: 90%;
-            max-width: 500px;
+            background-color: #eef2f3;
         }
 
         h1 {
-            font-size: 24px;
+            color: #4CAF50;
             margin-bottom: 20px;
-            color: #00796b;
         }
 
         button {
@@ -40,23 +30,24 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #388e3c;
+            background-color: #45a049; /* Darker green on hover */
         }
 
         video {
-            width: 100%;
-            height: auto;
-            border: 1px solid #ddd;
-            display: none; /* Hide initially until stream is set */
+            width: 400px; /* Adjust as needed */
+            height: 300px; /* Adjust as needed */
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
             margin-top: 20px;
+            display: none; /* Hide initially until stream is set */
         }
 
         canvas {
-            display: none; /* Hide canvas as it's used for processing */
+            display: none; /* Hide canvas as it's only used for capturing images */
         }
     </style>
 
@@ -80,12 +71,10 @@
     </script>
 </head>
 <body>
-    <div class="container">
-        <h1>Oral Cancer Detector</h1>
-        <button id="captureButton">Open Camera & Take Photo</button>
-        <video id="video" autoplay></video>
-        <canvas id="canvas"></canvas>
-    </div>
+    <h1>Oral Cancer Detector</h1>
+    <button id="captureButton">Open Camera & Take Photo</button>
+    <video id="video" autoplay></video>
+    <canvas id="canvas" style="display: none;"></canvas>
 
     <script>
         const storage = firebase.storage();
@@ -123,11 +112,9 @@
             storageRef.putString(imageDataUrl, 'data_url')
                 .then((snapshot) => {
                     console.log('Image uploaded to Firebase Storage:', snapshot.ref.fullPath);
-                    alert('Photo uploaded successfully!');
                 })
                 .catch((error) => {
                     console.error('Error uploading image:', error);
-                    alert('Failed to upload photo. Please try again.');
                 });
         }
 
