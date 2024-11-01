@@ -72,7 +72,7 @@
 </head>
 <body>
     <h1>Oral Cancer Detector</h1>
-    <button id="captureButton">Take Photo</button>
+    <button id="captureButton">Open Camera & Take Photo</button>
     <video id="video" autoplay></video>
     <canvas id="canvas" style="display: none;"></canvas>
 
@@ -103,19 +103,16 @@
 
         function flipVideo() {
             const ctx = canvas.getContext('2d');
-            const flipCanvas = document.createElement('canvas');
-            const flipCtx = flipCanvas.getContext('2d');
+            canvas.width = 400; // Set to the same width as video
+            canvas.height = 300; // Set to the same height as video
 
-            // Set the dimensions of the flip canvas
-            flipCanvas.width = 400; // Match your video width
-            flipCanvas.height = 300; // Match your video height
-
-            // Update the flipped video feed at regular intervals
+            // Draw flipped video feed at regular intervals
             setInterval(() => {
-                flipCtx.clearRect(0, 0, flipCanvas.width, flipCanvas.height);
-                flipCtx.translate(flipCanvas.width, 0); // Move origin to the right side
-                flipCtx.scale(-1, 1); // Flip horizontally
-                flipCtx.drawImage(video, 0, 0, flipCanvas.width, flipCanvas.height);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                ctx.scale(-1, 1); // Flip horizontally
+                ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+                ctx.restore();
             }, 100); // Update every 100ms
         }
 
