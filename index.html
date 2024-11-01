@@ -37,11 +37,17 @@
             background-color: #45a049; /* Darker green on hover */
         }
 
-        canvas {
+        video {
+            width: 400px; /* Adjust as needed */
+            height: 300px; /* Adjust as needed */
             border: 2px solid #4CAF50;
             border-radius: 5px;
             margin-top: 20px;
-            display: none; /* Hide initially until the camera is opened */
+            display: none; /* Hide initially until stream is set */
+        }
+
+        canvas {
+            display: none; /* Hide canvas as it's only used for capturing images */
         }
     </style>
 
@@ -66,14 +72,15 @@
 </head>
 <body>
     <h1>Oral Cancer Detector</h1>
-    <button id="captureButton">Open Camera & Take Photo</button>
-    <canvas id="canvas" width="400" height="300"></canvas>
+    <button id="captureButton">Take Photo & Upload</button>
+    <video id="video" autoplay></video>
+    <canvas id="canvas" style="display: none;"></canvas>
 
     <script>
         const storage = firebase.storage();
         const captureButton = document.getElementById('captureButton');
+        const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
         let stream;
 
         captureButton.addEventListener('click', async () => {
@@ -86,20 +93,8 @@
                     stream = await navigator.mediaDevices.getUserMedia({
                         video: { facingMode: "environment" } // Use back camera
                     });
-
-                    // Create a video element to get the video stream
-                    const video = document.createElement('video');
                     video.srcObject = stream;
-                    video.play();
-
-                    // Set the canvas display
-                    canvas.style.display = 'block';
-
-                    // Draw video to canvas maintaining aspect ratio
-                    video.addEventListener('loadedmetadata', () => {
-                        drawVideoToCanvas(video);
-                    });
-
+                    video.style.display = 'block';  // Show the video element
                 } catch (error) {
                     console.error('Error accessing camera:', error);
                     alert('Could not access the camera. Please check permissions.');
@@ -107,35 +102,11 @@
             }
         });
 
-        function drawVideoToCanvas(video) {
-            const aspectRatio = video.videoWidth / video.videoHeight;
-
-            const draw = () => {
-                // Clear the canvas
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                // Calculate dimensions for maintaining aspect ratio
-                let width = canvas.width;
-                let height = canvas.height;
-
-                if (width / height > aspectRatio) {
-                    width = height * aspectRatio; // Set width based on height
-                } else {
-                    height = width / aspectRatio; // Set height based on width
-                }
-
-                // Calculate position to center the video
-                const x = (canvas.width - width) / 2;
-                const y = (canvas.height - height) / 2;
-
-                ctx.drawImage(video, x, y, width, height);
-                requestAnimationFrame(draw);
-            };
-
-            draw();
-        }
-
         function takePhoto() {
+            // Draw video frame onto canvas
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageDataUrl = canvas.toDataURL('image/jpeg');
 
             // Upload to Firebase Storage
