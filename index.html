@@ -37,17 +37,16 @@
             background-color: #45a049; /* Darker green on hover */
         }
 
-        video {
-            width: 400px; /* Adjust as needed */
-            height: 300px; /* Adjust as needed */
-            border: 2px solid #4CAF50;
-            border-radius: 5px;
-            margin-top: 20px;
-            display: none; /* Hide initially until stream is set */
+        input[type="file"] {
+            display: none; /* Hide the file input */
         }
 
-        canvas {
-            display: none; /* Hide canvas as it's only used for capturing images */
+        img {
+            margin-top: 20px;
+            width: 400px; /* Adjust as needed */
+            height: auto; /* Maintain aspect ratio */
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
         }
     </style>
 
@@ -72,58 +71,37 @@
 </head>
 <body>
     <h1>Oral Cancer Detector</h1>
-    <button id="captureButton">Take Photo & Upload</button>
-    <video id="video" autoplay></video>
-    <canvas id="canvas" style="display: none;"></canvas>
+    <button id="captureButton">Open Camera & Take Photo</button>
+    <input type="file" id="fileInput" accept="image/*" capture="environment">
+    <img id="capturedImage" style="display: none;">
 
     <script>
         const storage = firebase.storage();
         const captureButton = document.getElementById('captureButton');
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        let stream;
+        const fileInput = document.getElementById('fileInput');
+        const capturedImage = document.getElementById('capturedImage');
 
-        captureButton.addEventListener('click', async () => {
-            if (stream) {
-                // If the stream is already active, take the photo
-                takePhoto();
-            } else {
-                try {
-                    // Request access to the back camera
-                    stream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: "environment" } // Use back camera
-                    });
-                    video.srcObject = stream;
-                    video.style.display = 'block';  // Show the video element
-                } catch (error) {
-                    console.error('Error accessing camera:', error);
-                    alert('Could not access the camera. Please check permissions.');
-                }
-            }
+        captureButton.addEventListener('click', () => {
+            fileInput.click(); // Trigger file input click to open camera
         });
 
-        function takePhoto() {
-            // Draw video frame onto canvas
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageDataUrl = canvas.toDataURL('image/jpeg');
+        fileInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    capturedImage.src = e.target.result; // Display the captured image
+                    capturedImage.style.display = 'block'; // Show the image
+                };
+                reader.readAsDataURL(file);
 
-            // Upload to Firebase Storage
-            const storageRef = storage.ref().child(`images/${Date.now()}.jpg`);
-            storageRef.putString(imageDataUrl, 'data_url')
-                .then((snapshot) => {
+                // Upload to Firebase Storage
+                const storageRef = storage.ref().child(`images/${Date.now()}.jpg`);
+                await storageRef.put(file).then((snapshot) => {
                     console.log('Image uploaded to Firebase Storage:', snapshot.ref.fullPath);
-                })
-                .catch((error) => {
+                }).catch((error) => {
                     console.error('Error uploading image:', error);
                 });
-        }
-
-        // Stop the video stream when leaving the page
-        window.addEventListener('beforeunload', () => {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
             }
         });
     </script>
