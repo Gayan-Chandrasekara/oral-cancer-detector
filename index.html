@@ -97,33 +97,7 @@
 
                     // Draw video to canvas maintaining aspect ratio
                     video.addEventListener('loadedmetadata', () => {
-                        const aspectRatio = video.videoWidth / video.videoHeight;
-                        let canvasWidth = canvas.width;
-                        let canvasHeight = canvas.height;
-
-                        if (canvasWidth / canvasHeight > aspectRatio) {
-                            // Canvas is wider than the video
-                            canvasWidth = canvasHeight * aspectRatio;
-                        } else {
-                            // Canvas is taller than the video
-                            canvasHeight = canvasWidth / aspectRatio;
-                        }
-
-                        // Update the canvas dimensions
-                        canvas.width = canvasWidth;
-                        canvas.height = canvasHeight;
-
-                        const drawVideoToCanvas = () => {
-                            // Clear the canvas
-                            ctx.clearRect(0, 0, canvas.width, canvas.height);
-                            // Calculate position to center the video
-                            const x = (canvas.width - canvasWidth) / 2;
-                            const y = (canvas.height - canvasHeight) / 2;
-                            ctx.drawImage(video, x, y, canvasWidth, canvasHeight);
-                            requestAnimationFrame(drawVideoToCanvas);
-                        };
-
-                        drawVideoToCanvas();
+                        drawVideoToCanvas(video);
                     });
 
                 } catch (error) {
@@ -132,6 +106,34 @@
                 }
             }
         });
+
+        function drawVideoToCanvas(video) {
+            const aspectRatio = video.videoWidth / video.videoHeight;
+
+            const draw = () => {
+                // Clear the canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Calculate dimensions for maintaining aspect ratio
+                let width = canvas.width;
+                let height = canvas.height;
+
+                if (width / height > aspectRatio) {
+                    width = height * aspectRatio; // Set width based on height
+                } else {
+                    height = width / aspectRatio; // Set height based on width
+                }
+
+                // Calculate position to center the video
+                const x = (canvas.width - width) / 2;
+                const y = (canvas.height - height) / 2;
+
+                ctx.drawImage(video, x, y, width, height);
+                requestAnimationFrame(draw);
+            };
+
+            draw();
+        }
 
         function takePhoto() {
             const imageDataUrl = canvas.toDataURL('image/jpeg');
@@ -156,4 +158,3 @@
     </script>
 </body>
 </html>
-
