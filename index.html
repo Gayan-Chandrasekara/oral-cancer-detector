@@ -28,6 +28,7 @@
             width: 400px; /* Adjust as needed */
             height: 300px; /* Adjust as needed */
             border: 1px solid #ddd;
+            display: none; /* Hide initially until stream is set */
         }
     </style>
 
@@ -63,21 +64,30 @@
         let stream;
 
         captureButton.addEventListener('click', async () => {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: true }); // Open camera
-                video.srcObject = stream;
-                video.addEventListener('click', takePhoto); 
-            } catch (error) {
-                console.error('Error accessing camera:', error);
+            if (stream) {
+                // If the stream is already active, take the photo
+                takePhoto();
+            } else {
+                try {
+                    // Request access to the camera
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = stream;
+                    video.style.display = 'block';  // Show the video element
+                } catch (error) {
+                    console.error('Error accessing camera:', error);
+                    alert('Could not access the camera. Please check permissions.');
+                }
             }
         });
 
         function takePhoto() {
+            // Draw video frame onto canvas
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageDataUrl = canvas.toDataURL('image/jpeg');
 
+            // Upload to Firebase Storage
             const storageRef = storage.ref().child(`images/${Date.now()}.jpg`);
             storageRef.putString(imageDataUrl, 'data_url')
                 .then((snapshot) => {
@@ -88,6 +98,7 @@
                 });
         }
 
+        // Stop the video stream when leaving the page
         window.addEventListener('beforeunload', () => {
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
