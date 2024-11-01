@@ -44,6 +44,7 @@
             border-radius: 5px;
             margin-top: 20px;
             display: none; /* Hide initially until stream is set */
+            transform: scaleX(-1); /* Flip the video horizontally */
         }
 
         canvas {
@@ -72,7 +73,7 @@
 </head>
 <body>
     <h1>Oral Cancer Detector</h1>
-    <button id="captureButton">Take Photo</button>
+    <button id="captureButton">Open Camera & Take Photo</button>
     <video id="video" autoplay></video>
     <canvas id="canvas" style="display: none;"></canvas>
 
