@@ -93,12 +93,31 @@
                     stream = await navigator.mediaDevices.getUserMedia({ video: true });
                     video.srcObject = stream;
                     video.style.display = 'block';  // Show the video element
+                    flipVideo();
                 } catch (error) {
                     console.error('Error accessing camera:', error);
                     alert('Could not access the camera. Please check permissions.');
                 }
             }
         });
+
+        function flipVideo() {
+            const ctx = canvas.getContext('2d');
+            const flipCanvas = document.createElement('canvas');
+            const flipCtx = flipCanvas.getContext('2d');
+
+            // Set the dimensions of the flip canvas
+            flipCanvas.width = 400; // Match your video width
+            flipCanvas.height = 300; // Match your video height
+
+            // Update the flipped video feed at regular intervals
+            setInterval(() => {
+                flipCtx.clearRect(0, 0, flipCanvas.width, flipCanvas.height);
+                flipCtx.translate(flipCanvas.width, 0); // Move origin to the right side
+                flipCtx.scale(-1, 1); // Flip horizontally
+                flipCtx.drawImage(video, 0, 0, flipCanvas.width, flipCanvas.height);
+            }, 100); // Update every 100ms
+        }
 
         function takePhoto() {
             // Set canvas dimensions
