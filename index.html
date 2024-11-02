@@ -77,7 +77,7 @@
 </head>
 <body>
     <h1>Oral Cancer Detector</h1>
-    <button id="captureButton"><i class="fas fa-camera"></i>  Take Photo</button>
+    <button id="captureButton"><i class="fas fa-camera"></i>&nbsp; Take Photo</button>
     <button id="uploadButton" style="display: none;"><i class="fas fa-upload"></i> Upload Photo</button>
     <input type="file" id="fileInput" accept="image/*" capture="environment">
     <img id="capturedImage" style="display: none;">
@@ -144,7 +144,7 @@
                     // Compress the image before uploading
                     const compressedBlob = await compressImage(capturedFile, 0.1); // Adjust quality as needed
                     // Upload to Firebase Storage
-                    const storageRef = storage.ref().child(`images/${Date.now()}.jpg`);
+                    const storageRef = storage.ref().child(`${Date.now()}.jpg`);
                     await storageRef.put(compressedBlob).then((snapshot) => {
                         console.log('Image uploaded to Firebase Storage:', snapshot.ref.fullPath);
                         alert('Photo uploaded successfully!');
