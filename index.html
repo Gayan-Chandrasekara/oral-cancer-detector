@@ -88,6 +88,21 @@
         const fileInput = document.getElementById('fileInput');
         const capturedImage = document.getElementById('capturedImage');
         let capturedFile = null;
+        let isFrontCamera = false;
+
+        // Detect camera type based on device labels
+        async function detectCameraType() {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            for (let device of devices) {
+                if (device.kind === 'videoinput' && device.label.toLowerCase().includes('front')) {
+                    isFrontCamera = true;
+                    break;
+                }
+            }
+        }
+
+        // Initialize the camera type detection
+        detectCameraType();
 
         // Event listener for capturing photo
         captureButton.addEventListener('click', () => {
@@ -109,9 +124,6 @@
 
                         canvas.width = img.width;
                         canvas.height = img.height;
-
-                        // Check if using front camera (based on capture attribute)
-                        const isFrontCamera = fileInput.getAttribute('capture') === 'user';
 
                         // Flip the image horizontally if using front camera
                         if (isFrontCamera) {
