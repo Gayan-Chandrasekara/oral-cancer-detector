@@ -62,12 +62,12 @@
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyCGfLct_6cFcUa1SbfVfcL5P2WO-ifTFBc",
-            authDomain: "oral-cancer-detector-7dc29.firebaseapp.com",
-            projectId: "oral-cancer-detector-7dc29",
-            storageBucket: "oral-cancer-detector-7dc29.appspot.com",
-            messagingSenderId: "7733802483",
-            appId: "1:7733802483:web:9008d9ad8fad09a59d4e86"
+            apiKey: "your-api-key",
+            authDomain: "your-auth-domain",
+            projectId: "your-project-id",
+            storageBucket: "your-storage-bucket",
+            messagingSenderId: "your-messaging-sender-id",
+            appId: "your-app-id"
         };
 
         // Initialize Firebase
@@ -88,21 +88,6 @@
         const fileInput = document.getElementById('fileInput');
         const capturedImage = document.getElementById('capturedImage');
         let capturedFile = null;
-        let isFrontCamera = false;
-
-        // Detect camera type based on device labels
-        async function detectCameraType() {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            for (let device of devices) {
-                if (device.kind === 'videoinput' && device.label.toLowerCase().includes('front')) {
-                    isFrontCamera = true;
-                    break;
-                }
-            }
-        }
-
-        // Initialize the camera type detection
-        detectCameraType();
 
         // Event listener for capturing photo
         captureButton.addEventListener('click', () => {
@@ -125,13 +110,13 @@
                         canvas.width = img.width;
                         canvas.height = img.height;
 
-                        // Flip the image horizontally if using front camera
-                        if (isFrontCamera) {
+                        // Flip the image horizontally if front camera is detected
+                        if (fileInput.capture === 'user') {
+                            ctx.translate(canvas.width, 0);
                             ctx.scale(-1, 1);
-                            ctx.drawImage(img, -img.width, 0, img.width, img.height);
-                        } else {
-                            ctx.drawImage(img, 0, 0, img.width, img.height);
                         }
+                        
+                        ctx.drawImage(img, 0, 0, img.width, img.height);
 
                         // Set the canvas image to the captured image
                         capturedImage.src = canvas.toDataURL('image/jpeg');
