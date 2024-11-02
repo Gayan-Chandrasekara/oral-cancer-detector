@@ -31,23 +31,23 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            margin: 10px; /* Add some space between buttons */
-            display: flex; /* Center icons */
-            align-items: center; /* Center icons vertically */
+            margin: 10px;
+            display: flex;
+            align-items: center;
         }
 
         button:hover {
-            background-color: #45a049; /* Darker green on hover */
+            background-color: #45a049;
         }
 
         input[type="file"] {
-            display: none; /* Hide the file input */
+            display: none;
         }
 
         img {
             margin-top: 20px;
-            width: 400px; /* Adjust as needed */
-            height: auto; /* Maintain aspect ratio */
+            width: 400px;
+            height: auto;
             border: 2px solid #4CAF50;
             border-radius: 5px;
         }
@@ -61,7 +61,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
     <script>
-        // Firebase config - replace with your actual values
         const firebaseConfig = {
             apiKey: "AIzaSyCGfLct_6cFcUa1SbfVfcL5P2WO-ifTFBc",
             authDomain: "oral-cancer-detector-7dc29.firebaseapp.com",
@@ -88,51 +87,49 @@
         const uploadButton = document.getElementById('uploadButton');
         const fileInput = document.getElementById('fileInput');
         const capturedImage = document.getElementById('capturedImage');
-        let capturedFile = null; // To store the captured file
+        let capturedFile = null;
 
         // Event listener for capturing photo
         captureButton.addEventListener('click', () => {
-            fileInput.click(); // Trigger file input click to open camera
+            fileInput.click();
         });
 
         // Event listener for file input change (photo captured)
         fileInput.addEventListener('change', async (event) => {
-            capturedFile = event.target.files[0]; // Store the captured file
+            capturedFile = event.target.files[0];
             if (capturedFile) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const img = new Image();
-                    img.src = e.target.result; // Set the image source
-        
+                    img.src = e.target.result;
+
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
-        
-                        // Set canvas dimensions to image dimensions
+
                         canvas.width = img.width;
                         canvas.height = img.height;
-        
-                        // Check if using front camera (you can adapt this logic as needed)
-                        const isFrontCamera = fileInput.capture === 'user'; // This captures the essence of using front camera
-        
-                        // Flip the image horizontally if using the front camera
+
+                        // Check if using front camera (based on capture attribute)
+                        const isFrontCamera = fileInput.getAttribute('capture') === 'user';
+
+                        // Flip the image horizontally if using front camera
                         if (isFrontCamera) {
-                            ctx.scale(-1, 1); // Flip horizontally
-                            ctx.drawImage(img, -img.width, 0, img.width, img.height); // Draw image on canvas
+                            ctx.scale(-1, 1);
+                            ctx.drawImage(img, -img.width, 0, img.width, img.height);
                         } else {
-                            ctx.drawImage(img, 0, 0, img.width, img.height); // Draw image normally
+                            ctx.drawImage(img, 0, 0, img.width, img.height);
                         }
-        
-                        // Display the processed image on the canvas
-                        capturedImage.src = canvas.toDataURL('image/jpeg'); // Convert canvas to image URL
-                        capturedImage.style.display = 'block'; // Show the image
-                        uploadButton.style.display = 'block'; // Show the upload button
+
+                        // Set the canvas image to the captured image
+                        capturedImage.src = canvas.toDataURL('image/jpeg');
+                        capturedImage.style.display = 'block';
+                        uploadButton.style.display = 'block';
                     };
                 };
                 reader.readAsDataURL(capturedFile);
             }
         });
-
 
         // Function to compress image without changing resolution
         async function compressImage(file, quality) {
@@ -153,7 +150,7 @@
                             } else {
                                 reject(new Error('Compression failed.'));
                             }
-                        }, 'image/jpeg', quality); // Compress to specified quality
+                        }, 'image/jpeg', quality);
                     };
                     img.onerror = (error) => reject(error);
                 };
@@ -166,9 +163,7 @@
         uploadButton.addEventListener('click', async () => {
             if (capturedFile) {
                 try {
-                    // Compress the image before uploading
-                    const compressedBlob = await compressImage(capturedFile, 0.1); // Adjust quality as needed
-                    // Upload to Firebase Storage
+                    const compressedBlob = await compressImage(capturedFile, 0.1);
                     const storageRef = storage.ref().child(`${Date.now()}.jpg`);
                     await storageRef.put(compressedBlob).then((snapshot) => {
                         console.log('Image uploaded to Firebase Storage:', snapshot.ref.fullPath);
@@ -191,15 +186,8 @@
             capturedImage.src = '';
             capturedImage.style.display = 'none';
             uploadButton.style.display = 'none';
-            fileInput.value = ''; // Reset file input
+            fileInput.value = '';
         }
-
-        // Optionally, handle beforeunload to stop any active streams
-        window.addEventListener('beforeunload', () => {
-            if (capturedFile) {
-                // No active streams in this implementation
-            }
-        });
     </script>
 </body>
 </html>
