@@ -144,7 +144,7 @@
                     // Compress the image before uploading
                     const compressedBlob = await compressImage(capturedFile, 0.1); // Adjust quality as needed
                     // Upload to Firebase Storage
-                    const storageRef = storage.ref().child(`images/${Date.now()}.jpg`);
+                    const storageRef = storage.ref().child(`${Date.now()}.jpg`);
                     await storageRef.put(compressedBlob).then((snapshot) => {
                         console.log('Image uploaded to Firebase Storage:', snapshot.ref.fullPath);
                         alert('Photo uploaded successfully!');
