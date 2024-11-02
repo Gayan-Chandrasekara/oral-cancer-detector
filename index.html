@@ -105,7 +105,7 @@
                         ctx.drawImage(img, 0, 0);
 
                         // Compress the image by converting canvas to JPEG with 70% quality
-                        compressedImageDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        compressedImageDataUrl = canvas.toDataURL('image/jpeg', 0.1);
 
                         // Show the compressed image
                         capturedImage.src = compressedImageDataUrl;
