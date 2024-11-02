@@ -101,13 +101,38 @@
             if (capturedFile) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    capturedImage.src = e.target.result; // Display the captured image
-                    capturedImage.style.display = 'block'; // Show the image
-                    uploadButton.style.display = 'block'; // Show the upload button
+                    const img = new Image();
+                    img.src = e.target.result; // Set the image source
+        
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+        
+                        // Set canvas dimensions to image dimensions
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+        
+                        // Check if using front camera (you can adapt this logic as needed)
+                        const isFrontCamera = fileInput.capture === 'user'; // This captures the essence of using front camera
+        
+                        // Flip the image horizontally if using the front camera
+                        if (isFrontCamera) {
+                            ctx.scale(-1, 1); // Flip horizontally
+                            ctx.drawImage(img, -img.width, 0, img.width, img.height); // Draw image on canvas
+                        } else {
+                            ctx.drawImage(img, 0, 0, img.width, img.height); // Draw image normally
+                        }
+        
+                        // Display the processed image on the canvas
+                        capturedImage.src = canvas.toDataURL('image/jpeg'); // Convert canvas to image URL
+                        capturedImage.style.display = 'block'; // Show the image
+                        uploadButton.style.display = 'block'; // Show the upload button
+                    };
                 };
                 reader.readAsDataURL(capturedFile);
             }
         });
+
 
         // Function to compress image without changing resolution
         async function compressImage(file, quality) {
