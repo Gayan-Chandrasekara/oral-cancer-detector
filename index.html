@@ -31,21 +31,21 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            margin: 10px;
+            margin: 10px; /* Add some space between buttons */
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #45a049; /* Darker green on hover */
         }
 
         input[type="file"] {
-            display: none;
+            display: none; /* Hide the file input */
         }
 
         img {
             margin-top: 20px;
-            width: 400px;
-            height: auto;
+            width: 400px; /* Adjust as needed */
+            height: auto; /* Maintain aspect ratio */
             border: 2px solid #4CAF50;
             border-radius: 5px;
         }
@@ -58,12 +58,12 @@
     <script>
         // Firebase config - replace with your actual values
         const firebaseConfig = {
-          apiKey: "YOUR_API_KEY",
-          authDomain: "YOUR_AUTH_DOMAIN",
-          projectId: "YOUR_PROJECT_ID",
-          storageBucket: "YOUR_STORAGE_BUCKET",
-          messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-          appId: "YOUR_APP_ID"
+          apiKey: "AIzaSyCGfLct_6cFcUa1SbfVfcL5P2WO-ifTFBc",
+          authDomain: "oral-cancer-detector-7dc29.firebaseapp.com",
+          projectId: "oral-cancer-detector-7dc29",
+          storageBucket: "oral-cancer-detector-7dc29.appspot.com",
+          messagingSenderId: "7733802483",
+          appId: "1:7733802483:web:9008d9ad8fad09a59d4e86"
         };
 
         // Initialize Firebase
@@ -85,55 +85,64 @@
         const fileInput = document.getElementById('fileInput');
         const capturedImage = document.getElementById('capturedImage');
         const canvas = document.getElementById('canvas');
-        let compressedImageDataUrl = null; // To store the compressed image data URL
+        let compressedImageData = null; // Store the compressed image data
 
         captureButton.addEventListener('click', () => {
-            fileInput.click();
+            fileInput.click(); // Trigger file input click to open camera
         });
 
-        fileInput.addEventListener('change', async (event) => {
-            const capturedFile = event.target.files[0];
-            if (capturedFile) {
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        // Draw image onto the canvas
-                        canvas.width = img.width;
-                        canvas.height = img.height;
+                reader.onload = (e) => {
+                    capturedImage.src = e.target.result; // Display the captured image
+                    capturedImage.style.display = 'block';
+                    uploadButton.style.display = 'block';
+
+                    // Compress the image by drawing it on a canvas
+                    capturedImage.onload = () => {
+                        canvas.width = capturedImage.width;
+                        canvas.height = capturedImage.height;
                         const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
+                        ctx.drawImage(capturedImage, 0, 0);
 
-                        // Compress the image by converting canvas to JPEG with 70% quality
-                        compressedImageDataUrl = canvas.toDataURL('image/jpeg', 0.1);
-
-                        // Show the compressed image
-                        capturedImage.src = compressedImageDataUrl;
-                        capturedImage.style.display = 'block';
-                        uploadButton.style.display = 'block';
+                        // Compress image to 0.7 quality (70%)
+                        compressedImageData = canvas.toDataURL('image/jpeg', 0.1);
                     };
-                    img.src = e.target.result;
                 };
-                reader.readAsDataURL(capturedFile);
+                reader.readAsDataURL(file);
             }
         });
 
         uploadButton.addEventListener('click', async () => {
-            if (compressedImageDataUrl) {
-                const response = await fetch(compressedImageDataUrl);
-                const blob = await response.blob();
-
+            if (compressedImageData) {
+                // Convert data URL to Blob for Firebase upload
+                const blob = dataURLToBlob(compressedImageData);
                 const storageRef = storage.ref().child(`images/${Date.now()}.jpg`);
-                storageRef.put(blob).then((snapshot) => {
+                
+                await storageRef.put(blob).then((snapshot) => {
                     console.log('Compressed image uploaded to Firebase Storage:', snapshot.ref.fullPath);
-                    alert('Compressed photo uploaded successfully!');
+                    alert('Photo uploaded successfully!');
                 }).catch((error) => {
-                    console.error('Error uploading compressed image:', error);
+                    console.error('Error uploading image:', error);
                 });
             } else {
                 alert('No photo captured to upload.');
             }
         });
+
+        // Helper function to convert data URL to Blob
+        function dataURLToBlob(dataURL) {
+            const [header, data] = dataURL.split(',');
+            const mimeString = header.match(/:(.*?);/)[1];
+            const byteString = atob(data);
+            const byteArray = new Uint8Array(byteString.length);
+            for (let i = 0; i < byteString.length; i++) {
+                byteArray[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([byteArray], { type: mimeString });
+        }
     </script>
 </body>
 </html>
