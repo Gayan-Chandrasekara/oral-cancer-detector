@@ -31,21 +31,21 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            margin: 10px;
+            margin: 10px; /* Add some space between buttons */
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #45a049; /* Darker green on hover */
         }
 
         input[type="file"] {
-            display: none;
+            display: none; /* Hide the file input */
         }
 
         img {
             margin-top: 20px;
-            width: 400px;
-            height: auto;
+            width: 400px; /* Adjust as needed */
+            height: auto; /* Maintain aspect ratio */
             border: 2px solid #4CAF50;
             border-radius: 5px;
         }
@@ -85,10 +85,12 @@
         const capturedImage = document.getElementById('capturedImage');
         let capturedFile = null; // To store the captured file
 
+        // Event listener for capturing photo
         captureButton.addEventListener('click', () => {
             fileInput.click(); // Trigger file input click to open camera
         });
 
+        // Event listener for file input change (photo captured)
         fileInput.addEventListener('change', async (event) => {
             capturedFile = event.target.files[0]; // Store the captured file
             if (capturedFile) {
@@ -102,24 +104,50 @@
             }
         });
 
+        // Event listener for uploading photo
         uploadButton.addEventListener('click', async () => {
             if (capturedFile) {
-                // Compress the image
-                const compressedBlob = await compressImage(capturedFile, 0.1); // Set quality to 0.7
-                const storageRef = storage.ref().child(`images/${Date.now()}.jpg`);
-                
-                // Upload to Firebase Storage
-                storageRef.put(compressedBlob).then((snapshot) => {
-                    console.log('Image uploaded to Firebase Storage:', snapshot.ref.fullPath);
-                    alert('Photo uploaded successfully!');
-                }).catch((error) => {
-                    console.error('Error uploading image:', error);
-                });
+                try {
+                    // Compress the image without changing resolution
+                    const compressedBlob = await compressImage(capturedFile, 0.1); // Adjust quality as needed
+                    console.log('Compressed Blob:', compressedBlob);
+
+                    // Upload to Firebase Storage
+                    const storageRef = storage.ref().child(`${Date.now()}.jpg`);
+                    const uploadTask = storageRef.put(compressedBlob);
+
+                    // Monitor upload progress
+                    uploadTask.on('state_changed', 
+                        (snapshot) => {
+                            // Optional: Track progress
+                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            console.log(`Upload is ${progress}% done`);
+                        }, 
+                        (error) => {
+                            console.error('Error uploading image:', error);
+                            alert('Error uploading image. Please try again.');
+                        }, 
+                        () => {
+                            // Upload completed successfully
+                            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                                console.log('Image uploaded to Firebase Storage:', downloadURL);
+                                alert('Photo uploaded successfully!');
+                                // Optionally, reset the form
+                                resetForm();
+                            });
+                        }
+                    );
+
+                } catch (error) {
+                    console.error('Compression error:', error);
+                    alert('Error compressing the image.');
+                }
             } else {
                 alert('No photo captured to upload.');
             }
         });
 
+        // Function to compress image without changing resolution
         async function compressImage(file, quality) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -140,11 +168,28 @@
                             }
                         }, 'image/jpeg', quality); // Compress to specified quality
                     };
+                    img.onerror = (error) => reject(error);
                 };
                 reader.onerror = (error) => reject(error);
                 reader.readAsDataURL(file);
             });
         }
+
+        // Function to reset the form after successful upload
+        function resetForm() {
+            capturedFile = null;
+            capturedImage.src = '';
+            capturedImage.style.display = 'none';
+            uploadButton.style.display = 'none';
+            fileInput.value = ''; // Reset file input
+        }
+
+        // Optionally, handle beforeunload to stop any active streams
+        window.addEventListener('beforeunload', () => {
+            if (capturedFile) {
+                // No active streams in this implementation
+            }
+        });
     </script>
 </body>
 </html>
