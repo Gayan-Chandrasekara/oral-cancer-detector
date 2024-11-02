@@ -31,23 +31,23 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            margin: 10px;
-            display: flex;
-            align-items: center;
+            margin: 10px; /* Add some space between buttons */
+            display: flex; /* Center icons */
+            align-items: center; /* Center icons vertically */
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #45a049; /* Darker green on hover */
         }
 
         input[type="file"] {
-            display: none;
+            display: none; /* Hide the file input */
         }
 
         img {
             margin-top: 20px;
-            width: 400px;
-            height: auto;
+            width: 400px; /* Adjust as needed */
+            height: auto; /* Maintain aspect ratio */
             border: 2px solid #4CAF50;
             border-radius: 5px;
         }
@@ -61,15 +61,17 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
     <script>
+        // Firebase config - replace with your actual values
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyCGfLct_6cFcUa1SbfVfcL5P2WO-ifTFBc",
+            authDomain: "oral-cancer-detector-7dc29.firebaseapp.com",
+            projectId: "oral-cancer-detector-7dc29",
+            storageBucket: "oral-cancer-detector-7dc29.appspot.com",
+            messagingSenderId: "7733802483",
+            appId: "1:7733802483:web:9008d9ad8fad09a59d4e86"
         };
 
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
     </script>
 </head>
@@ -86,26 +88,29 @@
         const uploadButton = document.getElementById('uploadButton');
         const fileInput = document.getElementById('fileInput');
         const capturedImage = document.getElementById('capturedImage');
-        let capturedFile = null;
+        let capturedFile = null; // To store the captured file
 
+        // Event listener for capturing photo
         captureButton.addEventListener('click', () => {
-            fileInput.click();
+            fileInput.click(); // Trigger file input click to open camera
         });
 
+        // Event listener for file input change (photo captured)
         fileInput.addEventListener('change', async (event) => {
-            capturedFile = event.target.files[0];
+            capturedFile = event.target.files[0]; // Store the captured file
             if (capturedFile) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    capturedImage.src = e.target.result;
-                    capturedImage.style.display = 'block';
-                    uploadButton.style.display = 'block';
+                    capturedImage.src = e.target.result; // Display the captured image
+                    capturedImage.style.display = 'block'; // Show the image
+                    uploadButton.style.display = 'block'; // Show the upload button
                 };
                 reader.readAsDataURL(capturedFile);
             }
         });
 
-        async function compressImage(file, quality, flipHorizontal = false) {
+        // Function to compress image without changing resolution
+        async function compressImage(file, quality) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = (event) => {
@@ -116,13 +121,6 @@
                         canvas.width = img.width;
                         canvas.height = img.height;
                         const ctx = canvas.getContext('2d');
-                        
-                        // Check if the front camera is used (flip if no "environment" capture attribute)
-                        if (fileInput.getAttribute("capture") !== "environment") {
-                            ctx.translate(canvas.width, 0);
-                            ctx.scale(-1, 1); // Flip horizontally
-                        }
-                        
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         canvas.toBlob((blob) => {
                             if (blob) {
@@ -130,7 +128,7 @@
                             } else {
                                 reject(new Error('Compression failed.'));
                             }
-                        }, 'image/jpeg', quality);
+                        }, 'image/jpeg', quality); // Compress to specified quality
                     };
                     img.onerror = (error) => reject(error);
                 };
@@ -139,11 +137,14 @@
             });
         }
 
+        // Event listener for uploading photo
         uploadButton.addEventListener('click', async () => {
             if (capturedFile) {
                 try {
-                    const compressedBlob = await compressImage(capturedFile, 0.1);
-                    const storageRef = storage.ref().child(`${Date.now()}.jpg`);
+                    // Compress the image before uploading
+                    const compressedBlob = await compressImage(capturedFile, 0.1); // Adjust quality as needed
+                    // Upload to Firebase Storage
+                    const storageRef = storage.ref().child(${Date.now()}.jpg);
                     await storageRef.put(compressedBlob).then((snapshot) => {
                         console.log('Image uploaded to Firebase Storage:', snapshot.ref.fullPath);
                         alert('Photo uploaded successfully!');
@@ -159,14 +160,16 @@
             }
         });
 
+        // Function to reset the form after successful upload
         function resetForm() {
             capturedFile = null;
             capturedImage.src = '';
             capturedImage.style.display = 'none';
             uploadButton.style.display = 'none';
-            fileInput.value = '';
+            fileInput.value = ''; // Reset file input
         }
 
+        // Optionally, handle beforeunload to stop any active streams
         window.addEventListener('beforeunload', () => {
             if (capturedFile) {
                 // No active streams in this implementation
