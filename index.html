@@ -31,21 +31,21 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            margin: 10px; /* Add some space between buttons */
+            margin: 10px;
         }
 
         button:hover {
-            background-color: #45a049; /* Darker green on hover */
+            background-color: #45a049;
         }
 
         input[type="file"] {
-            display: none; /* Hide the file input */
+            display: none;
         }
 
         img {
             margin-top: 20px;
-            width: 400px; /* Adjust as needed */
-            height: auto; /* Maintain aspect ratio */
+            width: 400px;
+            height: auto;
             border: 2px solid #4CAF50;
             border-radius: 5px;
         }
@@ -83,22 +83,22 @@
         const uploadButton = document.getElementById('uploadButton');
         const fileInput = document.getElementById('fileInput');
         const capturedImage = document.getElementById('capturedImage');
-        let capturedFile = null; // To store the captured file
+        let capturedFile = null;
 
         // Event listener for capturing photo
         captureButton.addEventListener('click', () => {
-            fileInput.click(); // Trigger file input click to open camera
+            fileInput.click();
         });
 
         // Event listener for file input change (photo captured)
         fileInput.addEventListener('change', async (event) => {
-            capturedFile = event.target.files[0]; // Store the captured file
+            capturedFile = event.target.files[0];
             if (capturedFile) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    capturedImage.src = e.target.result; // Display the captured image
-                    capturedImage.style.display = 'block'; // Show the image
-                    uploadButton.style.display = 'block'; // Show the upload button
+                    capturedImage.src = e.target.result;
+                    capturedImage.style.display = 'block';
+                    uploadButton.style.display = 'block';
                 };
                 reader.readAsDataURL(capturedFile);
             }
@@ -108,18 +108,17 @@
         uploadButton.addEventListener('click', async () => {
             if (capturedFile) {
                 try {
-                    // Compress the image without changing resolution
-                    const compressedBlob = await compressImage(capturedFile, 0.1); // Adjust quality as needed
+                    // Compress the image
+                    const compressedBlob = await compressImage(capturedFile, 0.1);
                     console.log('Compressed Blob:', compressedBlob);
 
                     // Upload to Firebase Storage
-                    const storageRef = storage.ref().child(`${Date.now()}.jpg`);
+                    const storageRef = storage.ref().child(`images/${Date.now()}.jpg`);
                     const uploadTask = storageRef.put(compressedBlob);
 
                     // Monitor upload progress
                     uploadTask.on('state_changed', 
                         (snapshot) => {
-                            // Optional: Track progress
                             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                             console.log(`Upload is ${progress}% done`);
                         }, 
@@ -128,12 +127,13 @@
                             alert('Error uploading image. Please try again.');
                         }, 
                         () => {
-                            // Upload completed successfully
+                            console.log('Upload successful, retrieving download URL...');
                             uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
                                 console.log('Image uploaded to Firebase Storage:', downloadURL);
                                 alert('Photo uploaded successfully!');
-                                // Optionally, reset the form
                                 resetForm();
+                            }).catch((error) => {
+                                console.error('Error retrieving download URL:', error);
                             });
                         }
                     );
@@ -147,7 +147,7 @@
             }
         });
 
-        // Function to compress image without changing resolution
+        // Function to compress image
         async function compressImage(file, quality) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -166,7 +166,7 @@
                             } else {
                                 reject(new Error('Compression failed.'));
                             }
-                        }, 'image/jpeg', quality); // Compress to specified quality
+                        }, 'image/jpeg', quality);
                     };
                     img.onerror = (error) => reject(error);
                 };
@@ -181,15 +181,8 @@
             capturedImage.src = '';
             capturedImage.style.display = 'none';
             uploadButton.style.display = 'none';
-            fileInput.value = ''; // Reset file input
+            fileInput.value = '';
         }
-
-        // Optionally, handle beforeunload to stop any active streams
-        window.addEventListener('beforeunload', () => {
-            if (capturedFile) {
-                // No active streams in this implementation
-            }
-        });
     </script>
 </body>
 </html>
