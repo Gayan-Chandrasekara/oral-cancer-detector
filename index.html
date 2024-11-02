@@ -62,15 +62,14 @@
 
     <script>
         const firebaseConfig = {
-            apiKey: "your-api-key",
-            authDomain: "your-auth-domain",
-            projectId: "your-project-id",
-            storageBucket: "your-storage-bucket",
-            messagingSenderId: "your-messaging-sender-id",
-            appId: "your-app-id"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
     </script>
 </head>
@@ -89,47 +88,24 @@
         const capturedImage = document.getElementById('capturedImage');
         let capturedFile = null;
 
-        // Event listener for capturing photo
         captureButton.addEventListener('click', () => {
             fileInput.click();
         });
 
-        // Event listener for file input change (photo captured)
         fileInput.addEventListener('change', async (event) => {
             capturedFile = event.target.files[0];
             if (capturedFile) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const img = new Image();
-                    img.src = e.target.result;
-
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-
-                        // Flip the image horizontally if front camera is detected
-                        if (fileInput.capture === 'user') {
-                            ctx.translate(canvas.width, 0);
-                            ctx.scale(-1, 1);
-                        }
-                        
-                        ctx.drawImage(img, 0, 0, img.width, img.height);
-
-                        // Set the canvas image to the captured image
-                        capturedImage.src = canvas.toDataURL('image/jpeg');
-                        capturedImage.style.display = 'block';
-                        uploadButton.style.display = 'block';
-                    };
+                    capturedImage.src = e.target.result;
+                    capturedImage.style.display = 'block';
+                    uploadButton.style.display = 'block';
                 };
                 reader.readAsDataURL(capturedFile);
             }
         });
 
-        // Function to compress image without changing resolution
-        async function compressImage(file, quality) {
+        async function compressImage(file, quality, flipHorizontal = false) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = (event) => {
@@ -140,6 +116,13 @@
                         canvas.width = img.width;
                         canvas.height = img.height;
                         const ctx = canvas.getContext('2d');
+                        
+                        // Check if the front camera is used (flip if no "environment" capture attribute)
+                        if (fileInput.getAttribute("capture") !== "environment") {
+                            ctx.translate(canvas.width, 0);
+                            ctx.scale(-1, 1); // Flip horizontally
+                        }
+                        
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         canvas.toBlob((blob) => {
                             if (blob) {
@@ -156,7 +139,6 @@
             });
         }
 
-        // Event listener for uploading photo
         uploadButton.addEventListener('click', async () => {
             if (capturedFile) {
                 try {
@@ -177,7 +159,6 @@
             }
         });
 
-        // Function to reset the form after successful upload
         function resetForm() {
             capturedFile = null;
             capturedImage.src = '';
@@ -185,6 +166,12 @@
             uploadButton.style.display = 'none';
             fileInput.value = '';
         }
+
+        window.addEventListener('beforeunload', () => {
+            if (capturedFile) {
+                // No active streams in this implementation
+            }
+        });
     </script>
 </body>
 </html>
